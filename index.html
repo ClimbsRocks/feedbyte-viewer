@@ -65,10 +65,11 @@
 
       $('button').on('click',function() {
         console.log('heard a click!', $(this).attr('id'));
-        // $(this).parent()
+        var firebaseID = $(this).attr('id');
+        var thisMessage = new Firebase('https://' + firebaseID');
+        console.log($(this).parent());
         //TODO: this whole section will need to be refactored. 
         //each piece of data has it's own distinct url. so what we do is create a new firebase object from that url:
-        var thisMessage = new Firebase('https://iuzevgn3xvt.firebaseio-demo.com/');
         //then set that data to the new value (like +1 vote);
       });
     };
