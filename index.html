@@ -9,16 +9,11 @@
   <meta name="viewport" content="width=device-width">
   <link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.css">
   <link rel="stylesheet" type="text/css" href="bower_components/bluebird/js/browser/bluebird.js">
-  
-  
-  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-  <!-- // <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.3.3.min.js"></script> -->
-  <!-- // <script type="text/javascript" src="iterate.js"></script> -->
-  <!-- // <script type="text/javascript" src="loadDataAndStartEventListeners.js"></script> -->
+  <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
 </head>
 
 <body>
-  
+
   <div id="main">
     <table class="table table-bordered">
      <thead>
@@ -37,7 +32,17 @@
    </table>
   </div>
 
+
+  <div id="messageDetails">
+    <h2>Details</h2>
+    <div id="message"></message>
+  </div>
+
   <script type="text/javascript">
+  function displayMessage(message) {
+    $('<div/>').text(message.comment).prepend($('<em/>').text(message.user+': ')).appendTo($('#message'));
+  };
+
   $(function() {
 
     var firebase = new Firebase('https://feedbyte.firebaseio.com/');
@@ -49,28 +54,28 @@
       //or we can refactor iterate to let it handle just one object.
       eventListeners();
     });
+
+    firebase.on('child_changed', function(snapshot) {
+      var message = snapshot.val();
+      message.firebaseID = snapshot.key();
+      formatIssue(message);
+    });
    var counter = 1;
-   var results = [];
    var tableEntry;
 
    var formatIssue = function(entry) {
     tableEntry = "<tr id=" + entry.firebaseID + "><th scope='row'>" + counter + "</th><td>" + entry.user + "</td><td>" + entry.comment + "</td><td>" + entry.url + "</td><td>" + new Date(entry.timestamp) + "</td><td>" + entry.votes + "</td><td><button type='button' id=" + entry.firebaseID + ">Click Me!</button></tr>";
     counter++;
     $('tbody').append(tableEntry.toString());
-    results.push(tableEntry);
    };
 
-   //the eventListeners are not hooked up yet. 
     var eventListeners = function() {
-
       $('button').on('click',function() {
         console.log('heard a click!', $(this).attr('id'));
-        var firebaseID = $(this).attr('id');
-        var thisMessage = new Firebase('https://' + firebaseID');
-        console.log($(this).parent());
-        //TODO: this whole section will need to be refactored. 
-        //each piece of data has it's own distinct url. so what we do is create a new firebase object from that url:
-        //then set that data to the new value (like +1 vote);
+        var firebaseID = $(this).attr('id'); //this successfully grabs the firebaseID
+        //TODO: grab the current vote count, and update the server with the current vote count +1
+        var child = firebase.orderByChild().equalTo(firebaseID); //this does not work yet
+        firebase.child(firebaseID).update({votes: child.votes++}); //this does not work yet either. 
       });
     };
   });
